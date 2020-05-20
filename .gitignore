@@ -51,7 +51,6 @@ hs_err_pid*
 doc/
 
 # Eclipse
-
 *.launch
 .classpath
 .project
@@ -61,3 +60,5 @@ bin/
 test-output/
 maven-eclipse.xml
 .factorypath
+
+build.internal.xml
