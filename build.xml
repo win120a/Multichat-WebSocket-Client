@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<project name="ACMCS-Websocket" basedir="." default="war">
+    <target name="war">
+        <jar destfile="webClient.war" basedir="WebContent" />
+    </target>
+</project>
