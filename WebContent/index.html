@@ -19,6 +19,8 @@
 <html>
 <head>
     <title>AC Multi-Chat Suite - WebSocket client</title>
+    
+    <script src="scripts/protocol.js"></script>
     <script src="scripts/websocket.js"></script>
 
     <link rel="stylesheet" type="text/css" href="stylesheets/bootstrap.css">
@@ -37,10 +39,14 @@
 
     <script>
         $().ready(() => {
+            let data = location.host.split(":");
+            $("#serverIP")[0].value = data[0];
+            $("#port")[0].value = data[1];
+            
             $("#informationWindow").modal();
 
             $("#iw_ok").click(() => {
-                initWS($("#serverIP")[0].value, $("#port")[0].value);
+                initWS($("#serverIP")[0].value, $("#port")[0].value, $("#nickname")[0].value);
                 $("#informationWindow").modal("hide");
             });
 
@@ -60,6 +66,9 @@
 
                 $("#iw_ok")[0].disabled = (ip.length === 0) || (port.length === 0) || (nickname.length === 0);
             };
+            
+            $("#sendButton").click(() => send());
+            $("#disconnectButton").click(() => closeConnection());
         });
     </script>
 </head>
@@ -70,7 +79,6 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">请输入用户信息</h5>
-                </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group row">
@@ -103,8 +111,8 @@
         <textarea id="chatlog" readonly cols="80" rows="15" class="form-control"></textarea><br />
         <input id="msg" type="text" class="form-control" placeholder="输入消息……" />
     </div>
-    <button type="submit" id="sendButton" onClick="postToServer()" class="btn btn-primary">发送</button>
-    <button type="submit" id="sendButton" onClick="closeConnect()" class="btn btn-danger">断开连接</button>
+    <button type="submit" id="sendButton" class="btn btn-primary">发送</button>
+    <button type="submit" id="disconnectButton" class="btn btn-danger">断开连接</button>
 </body>
 </body>
 </html>

@@ -1,91 +1,60 @@
-// << CONNECT >>(UUID)>>>>(Name)<< CONNECT >>
+/*
+    Copyright (C) 2011-2020 Andy Cheung
 
-/**
- * 用户注册协议消息的左半部分。
- * 消息格式：&lt;&lt; CONNECT &gt;&gt;(UUID)&gt;&gt;&gt;&gt;(用户名)&lt;&lt; CONNECT &gt;&gt;
- */
-const CONNECTING_GREET_LEFT_HALF = "<< CONNECT >>";
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-/**
- * 用户注册协议消息的中间部分。
- * 消息格式：&lt;&lt; CONNECT &gt;&gt;(UUID)&gt;&gt;&gt;&gt;(用户名)&lt;&lt; CONNECT &gt;&gt;
- */
-const CONNECTING_GREET_MIDDLE_HALF = ">>>>>";
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-/**
- * 用户注册协议消息的右半部分。
- * 消息格式：&lt;&lt; CONNECT &gt;&gt;(UUID)&gt;&gt;&gt;&gt;(用户名)&lt;&lt; CONNECT &gt;&gt;
- */
-const CONNECTING_GREET_RIGHT_HALF = "<< CONNECT >>";
-
-/**
- * 客户端通知注销的请求头。
- */
-const NOTIFY_LOGOFF_HEADER = "<< LOGOFF >>";
-
-// << MESSAGE >>> <<<< (UUID) >>>> << MESSAGE >> (messageContent)
-/**
- * 信息包的左半部分。
- * 格式： &lt;&lt; MESSAGE &gt;&gt;&gt; &lt;&lt;&lt;&lt; (UUID) &gt;&gt;&gt;&gt; &lt;&lt; MESSAGE &gt;&gt; (内容)
- */
-const MESSAGE_HEADER_LEFT_HALF = "<< MESSAGE >>> <<<<";
-
-/**
- * 信息包的中间部分。
- * 格式： &lt;&lt; MESSAGE &gt;&gt;&gt; &lt;&lt;&lt;&lt; (UUID) &gt;&gt;&gt;&gt; &lt;&lt; MESSAGE &gt;&gt; (内容)
- */
-const MESSAGE_HEADER_MIDDLE_HALF = ">>>>>";
-
-/**
- * 信息包的右半部分。
- * 格式： &lt;&lt; MESSAGE &gt;&gt;&gt; &lt;&lt;&lt;&lt; (UUID) &gt;&gt;&gt;&gt; &lt;&lt; MESSAGE &gt;&gt; (内容)
- */
-const MESSAGE_HEADER_RIGHT_HALF = " << MESSAGE >>";
-
-/**
- * 调试模式的信号字。目前是让服务器把用户档案打印出来。
- */
-const DEBUG_MODE_const = "/// DEBUG ///";
-
-/**
- * 调试模式的信号字。目前是让服务器把用户档案打印出来。
- */
-const BROADCAST_MESSAGE_UUID = "SERVER";
-
-// <<< DUP ? >>> (Name)
-/**
- * 用户名查询服务请求头。
- */
-const CHECK_DUPLICATE_REQUEST_HEADER = "<<< DUP ? >>> ";
-
-/**
- * 用户名查询服务响应 - 用户名已经占用
- */
-const USER_NAME_DUPLICATED = ">>> DUPLICATED <<< ";
-
-/**
- * 用户名查询服务响应 - 用户名没有占用
- */
-const USER_NAME_NOT_EXIST = "<<< Clear >>>";
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
 
 let ws;
+let nickname;
+let uuid;
 
-let initWS = (host, port) => {
+let initWS = (host, port, nicknameToSend) => {
     ws = new WebSocket("ws://" + host + ":" + port + "/acmcs/wshandler");
 
-    ws.onopen = function(){
+    ws.onopen = function () {
+        ws.send(CHECK_DUPLICATE_REQUEST_HEADER + nicknameToSend);
     };
 
-    ws.onmessage = function(message){
-        document.getElementById("chatlog").textContent += message.data + "\n";
+    ws.onmessage = function (message){
+        if (message.data.indexOf(WEBSOCKET_UUID_HEADER) != -1) {
+            uuid = message.data.replace(WEBSOCKET_UUID_HEADER, "").replace(WEBSOCKET_UUID_TAIL, "");
+            document.getElementById("chatlog").textContent += "Connected to Server. UUID: " + uuid + "  Nickname: " + nicknameToSend + "\n";
+            return;
+        } else if (message.data.indexOf(USER_NAME_DUPLICATED) != -1) {
+            alert("用户名重复了！请刷新页面重试！");
+            ws.close();
+        } else if (message.data.indexOf(USER_NAME_NOT_EXIST) != -1) {
+            // Formally register.
+            ws.send(CONNECTING_GREET_LEFT_HALF + uuid + CONNECTING_GREET_MIDDLE_HALF + nicknameToSend + CONNECTING_GREET_RIGHT_HALF);
+            nickname = nicknameToSend;
+        } else if (message.data.indexOf(MESSAGE_HEADER_LEFT_HALF) != -1) {
+            document.getElementById("chatlog").textContent += message.data.replace(MESSAGE_HEADER_MIDDLE_HALF, ": ")
+                                                            .replace(MESSAGE_HEADER_RIGHT_HALF, "")
+                                                                .replace(MESSAGE_HEADER_LEFT_HALF, "") + "\n";
+        } else {
+            document.getElementById("chatlog").textContent += message.data + "\n";
+        }
     };
 }
 
-function postToServer(){
-    ws.send(document.getElementById("msg").value);
+let send = () => {
+    let msg = document.getElementById("msg").value;
+    ws.send(MESSAGE_HEADER_LEFT_HALF + uuid + MESSAGE_HEADER_MIDDLE_HALF + MESSAGE_HEADER_RIGHT_HALF + msg);
+    document.getElementById("chatlog").textContent += nickname + ": " + msg + "\n";
     document.getElementById("msg").value = "";
-}
+};
 
-function closeConnect(){
+let closeConnection = () => {
     ws.close();
-}
+};
