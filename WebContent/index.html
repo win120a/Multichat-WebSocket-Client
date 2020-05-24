@@ -39,7 +39,7 @@
 
     <script>
         $().ready(() => {
-            let data = location.host.split(":");
+            let data = location.host === "" ? "127.0.0.1:8090".split(":") : location.host.split(":");
             $("#serverIP")[0].value = data[0];
             $("#port")[0].value = data[1];
             
@@ -71,6 +71,8 @@
             $("#disconnectButton").click(() => closeConnection());
         });
     </script>
+    
+    <script src="scripts/bslib.js"></script>
 </head>
 
 <body style="text-align : center;" class="container-fluid">
