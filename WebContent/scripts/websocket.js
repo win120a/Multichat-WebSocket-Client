@@ -70,4 +70,6 @@ let send = () => {
 
 let closeConnection = () => {
     ws.close();
+    $("#sendButton")[0].disabled = true;
+    $("#disconnectButton")[0].disabled = true;
 };
