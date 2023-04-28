@@ -41,7 +41,7 @@ function getBrowserType() {
         return BROWSER_IE;
     } else if (ua.match(/Firefox\/(\d.)+/) != null) {
         return BROWSER_FIREFOX;
-    } else if (ua.match(/Safari\/(\d.)+/) != null){
+    } else if (ua.match(/Safari\/(\d.)+/) != null) {
         return BROWSER_SAFARI;
     } else {
         return BROWSER_UNKNOWN;
@@ -57,7 +57,7 @@ function getTerminalType() {
         return TERMINAL_ANDROID;
     } else if (ua.match(/Windows/) != null) {
         return TERMINAL_WINDOWS;
-    } else if (ua.match(/Linux/) != null){
+    } else if (ua.match(/Linux/) != null) {
         return TERMINAL_LINUX;
     } else if (ua.match(/Windows Phone (\d.)+/) != null) {
         return TERMINAL_WP;
@@ -66,8 +66,7 @@ function getTerminalType() {
     }
 }
 
-function isMobileDevice()
-{
+function isMobileDevice() {
     const type = getTerminalType();
     return type == TERMINAL_ANDROID || type == TERMINAL_WP || type == TERMINAL_IOS;
 }

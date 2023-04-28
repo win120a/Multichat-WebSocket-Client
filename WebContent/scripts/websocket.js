@@ -35,11 +35,10 @@ let initWS = (host, port, nicknameToSend) => {
     };
 
     ws.onmessage = function (message){
-        if (message.data.indexOf(WEBSOCKET_UUID_HEADER) != -1) {
+        if (message.data.indexOf(WEBSOCKET_UUID_HEADER) !== -1) {
             uuid = message.data.replace(WEBSOCKET_UUID_HEADER, "").replace(WEBSOCKET_UUID_TAIL, "");
             document.getElementById("chatlog").textContent += "Handshake to Server Successfully. UUID: " + uuid + "  Nickname: " + nicknameToSend + "\n";
-            return;
-        } else if (message.data.indexOf(USER_NAME_DUPLICATED) != -1) {
+        } else if (message.data.indexOf(USER_NAME_DUPLICATED) !== -1) {
             ws.close();
             reinputDialogHandle = inputBox("提示", "用户名重复了，请重新输入昵称：", (name) => {
                 reinputNN = true;
@@ -47,11 +46,11 @@ let initWS = (host, port, nicknameToSend) => {
                 
                 return true;
             });
-        } else if (message.data.indexOf(USER_NAME_NOT_EXIST) != -1) {  
+        } else if (message.data.indexOf(USER_NAME_NOT_EXIST) !== -1) {
             // Formally register.
             ws.send(CONNECTING_GREET_LEFT_HALF + uuid + CONNECTING_GREET_MIDDLE_HALF + nicknameToSend + CONNECTING_GREET_RIGHT_HALF);
             nickname = nicknameToSend;
-        } else if (message.data.indexOf(MESSAGE_HEADER_LEFT_HALF) != -1) {
+        } else if (message.data.indexOf(MESSAGE_HEADER_LEFT_HALF) !== -1) {
             document.getElementById("chatlog").textContent += message.data.replace(MESSAGE_HEADER_MIDDLE_HALF, ": ")
                                                             .replace(MESSAGE_HEADER_RIGHT_HALF, "")
                                                                 .replace(MESSAGE_HEADER_LEFT_HALF, "") + "\n";
